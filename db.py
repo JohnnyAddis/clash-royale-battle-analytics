@@ -96,7 +96,7 @@ def get_players(conn):
         for r in rows
     ]
 
-def get_players(conn):
+def get_player_by_tag(conn, player_tag):
     query = """
         SELECT
             player_tag,
@@ -106,23 +106,24 @@ def get_players(conn):
             last_seen_at,
             created_at
         FROM players
-        ORDER BY created_at DESC;
+        WHERE player_tag = %s;
     """
     with conn.cursor() as cur:
-        cur.execute(query)
-        rows = cur.fetchall()
+        cur.execute(query, (player_tag,))
+        row = cur.fetchone()
 
-    return [
-        {
-            "player_tag": r[0],
-            "player_name": r[1],
-            "is_active": r[2],
-            "last_polled_at": r[3],
-            "last_seen_at": r[4],
-            "created_at": r[5],
-        }
-        for r in rows
-    ]
+    if row is None:
+        return None
+
+    return {
+        "player_tag": row[0],
+        "player_name": row[1],
+        "is_active": row[2],
+        "last_polled_at": row[3],
+        "last_seen_at": row[4],
+        "created_at": row[5],
+    }
+
 
 
 #this should just be a db read, return players with active status assigned to them

@@ -6,7 +6,8 @@ from db import (
     get_deck_win_rates,
     get_mode_win_rates,
     get_time_series_win_rates,
-    get_players
+    get_players,
+    get_player_by_tag
 )
 
 app = FastAPI(
@@ -38,6 +39,17 @@ def register_player_endpoint(req: PlayerRegisterRequest):
         "status": "ok",
         "player_tag": req.player_tag
     }
+
+@app.get("/players/{player_tag}")
+def get_player(player_tag: str):
+    conn = get_connection()
+    try:
+        player = get_player_by_tag(conn, player_tag)
+        if player is None:
+            raise HTTPException(status_code=404, detail="Player not found")
+        return player
+    finally:
+        conn.close()
 
 @app.get("/players")
 def list_players():
