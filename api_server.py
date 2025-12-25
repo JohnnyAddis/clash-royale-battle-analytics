@@ -6,6 +6,7 @@ from db import (
     get_deck_win_rates,
     get_mode_win_rates,
     get_time_series_win_rates,
+    get_players
 )
 
 app = FastAPI(
@@ -38,6 +39,13 @@ def register_player_endpoint(req: PlayerRegisterRequest):
         "player_tag": req.player_tag
     }
 
+@app.get("/players")
+def list_players():
+    conn = get_connection()
+    try:
+        return get_players(conn)
+    finally:
+        conn.close()
 
 @app.get("/analytics/decks")
 def deck_win_rates():

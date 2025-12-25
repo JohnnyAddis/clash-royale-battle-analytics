@@ -67,6 +67,64 @@ def register_player(conn, player_tag, player_name=None):
         cur.execute(query, (player_tag, player_name))
     conn.commit()
 
+#used for GET /players endpoint to show system state. mainly for debugging purposes atm.
+def get_players(conn):
+    query = """
+        SELECT
+            player_tag,
+            player_name,
+            is_active,
+            last_polled_at,
+            last_seen_at,
+            created_at
+        FROM players
+        ORDER BY created_at DESC;
+    """
+    with conn.cursor() as cur:
+        cur.execute(query)
+        rows = cur.fetchall()
+
+    return [
+        {
+            "player_tag": r[0],
+            "player_name": r[1],
+            "is_active": r[2],
+            "last_polled_at": r[3],
+            "last_seen_at": r[4],
+            "created_at": r[5],
+        }
+        for r in rows
+    ]
+
+def get_players(conn):
+    query = """
+        SELECT
+            player_tag,
+            player_name,
+            is_active,
+            last_polled_at,
+            last_seen_at,
+            created_at
+        FROM players
+        ORDER BY created_at DESC;
+    """
+    with conn.cursor() as cur:
+        cur.execute(query)
+        rows = cur.fetchall()
+
+    return [
+        {
+            "player_tag": r[0],
+            "player_name": r[1],
+            "is_active": r[2],
+            "last_polled_at": r[3],
+            "last_seen_at": r[4],
+            "created_at": r[5],
+        }
+        for r in rows
+    ]
+
+
 #this should just be a db read, return players with active status assigned to them
 def get_active_players(conn):
     with conn.cursor() as cur:
