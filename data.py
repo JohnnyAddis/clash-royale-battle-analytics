@@ -1,10 +1,10 @@
 import time
 from api import fetch_battle_log
 from parser import parse_battle
-from db import get_connection, ingest_battle, get_deck_win_rates, get_mode_win_rates, get_time_series_win_rates
+from db import get_connection, ingest_battle, get_deck_win_rates, get_mode_win_rates, get_time_series_win_rates, get_active_players
 from config import PLAYER_TAG
 
-POLLING_INTERVAL_SECONDS = 600 #10 minutes for now
+POLLING_INTERVAL_SECONDS = 5 #10 minutes for now
 
 
 def poll_once(conn):
@@ -62,8 +62,13 @@ def main():
 
         )
     print("-----------------------------\n")
+
+
+    
     # ---- END TEMP ----
     try:
+        active_players = get_active_players(conn)
+        print(f"[debug] active players from DB: {active_players}")
         while True:
             try:
                 poll_once(conn)

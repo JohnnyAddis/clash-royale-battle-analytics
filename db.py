@@ -51,6 +51,19 @@ def ingest_battle(conn, battle):
 
     conn.commit()
 
+#this should just be a db read, return players with active status assigned to them
+def get_active_players(conn):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT player_tag
+            FROM players
+            WHERE is_active = TRUE;
+            """
+        )
+        rows = cur.fetchall()
+    return [row[0] for row in rows]
+
 
 def get_deck_win_rates(conn):
     """
