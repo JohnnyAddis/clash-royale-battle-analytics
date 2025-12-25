@@ -9,6 +9,8 @@ from db import (
     get_players,
     get_player_by_tag
 )
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(
     title="Clash Royale Battle Analytics API",
@@ -16,6 +18,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class PlayerRegisterRequest(BaseModel):
     player_tag: str
     player_name: str | None = None
