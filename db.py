@@ -50,3 +50,86 @@ def ingest_battle(conn, battle):
         )
 
     conn.commit()
+
+
+def get_deck_win_rates(conn):
+    """
+    Returns win rate statistics per deck (RANKED/TROPHY MODE ONLY).
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                deck_signature,
+                COUNT(*) AS games,
+                SUM(win::int) AS wins,
+                ROUND(AVG(win::int) * 100, 2) AS win_rate
+            FROM battles
+            GROUP BY deck_signature
+            ORDER BY win_rate DESC;
+            """
+        )
+
+        rows = cur.fetchall()
+
+    results = []
+    for deck_signature, games, wins, win_rate in rows:
+        results.append({
+            "deck_signature": deck_signature,
+            "games": games,
+            "wins": wins,
+            "win_rate": win_rate
+        })
+
+    return results
+
+
+def get_mode_win_rates(conn):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                game_mode,
+                COUNT(*) AS games,
+                SUM(win::int) AS wins,
+                ROUND(AVG(win::int) * 100, 2) AS win_rate
+            FROM battles
+            GROUP BY game_mode;
+            """
+        )
+
+        rows = cur.fetchall()
+
+    return [
+        {
+            "game_mode": game_mode,
+            "games": games,
+            "wins": wins,
+            "win_rate": win_rate,
+        }
+        for game_mode, games, wins, win_rate in rows
+    ]
+
+
+def get_time_based_win_rate(conn):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                DATE(battle_time) AS day,
+                COUNT(*) AS games,
+                ROUND(AVG(win::int) * 100, 2) AS win_rate
+            FROM battles
+            GROUP BY day
+            ORDER BY day;
+            """
+        )
+        rows = cur.fetchall()
+        return [
+        {
+            "date": day,
+            "games": games,
+            "win_rate": win_rate,
+        }
+        for day, games, win_rate in rows
+    ]

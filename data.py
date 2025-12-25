@@ -1,7 +1,7 @@
 import time
 from api import fetch_battle_log
 from parser import parse_battle
-from db import get_connection, ingest_battle
+from db import get_connection, ingest_battle, get_deck_win_rates, get_mode_win_rates, get_time_based_win_rate
 from config import PLAYER_TAG
 
 POLLING_INTERVAL_SECONDS = 600 #10 minutes for now
@@ -25,6 +25,44 @@ def poll_once(conn):
 def main():
     conn = get_connection()
     print('Started polling. ctr c to stop.')
+
+     # ---- TEMP: analytics test ----
+     #win-rate by deck
+    print("\nDeck win rates:")
+    stats = get_deck_win_rates(conn)
+    for s in stats:
+        print(
+            f"Deck: {s['deck_signature'][:30]}... | "
+            f"Games: {s['games']} | "
+            f"Win %: {s['win_rate']}"
+        )
+    print("-----------------------------\n")
+
+
+    #win-rate by game mode
+    print("\n Game Mode Win Rates:")
+    stats = get_mode_win_rates(conn)
+    for s in stats:
+        print(
+            f'Game Mode: {s['game_mode']} |'
+            f'Games: {s['games']} |'
+            f'Win %: {s['win_rate']}'
+        )
+    print("-----------------------------\n")
+
+
+
+    print('\n Win-Rate by date:')
+    stats = get_time_based_win_rate(conn)
+    for s in stats:
+        print(
+            f'Date: : {s['date']} | '
+            f'Games: {s['games']} |'
+            f'Win %: {s['win_rate']} |'
+
+        )
+    print("-----------------------------\n")
+    # ---- END TEMP ----
     try:
         while True:
             try:
