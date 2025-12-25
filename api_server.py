@@ -1,14 +1,8 @@
-"""
-First time using fastapi, not sure exactly what i am doing but my goal is to:
-1) create fastapi app
-2)define routes
-3) call the basic analytics functions i just wrote from db.py
-"""
-
-# api_server.py
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from db import (
     get_connection,
+    register_player,
     get_deck_win_rates,
     get_mode_win_rates,
     get_time_series_win_rates,
@@ -19,6 +13,30 @@ app = FastAPI(
     description="Analytics backend for Clash Royale battle data",
     version="0.1.0",
 )
+
+class PlayerRegisterRequest(BaseModel):
+    player_tag: str
+    player_name: str | None = None
+
+@app.post("/players/register")
+def register_player_endpoint(req: PlayerRegisterRequest):
+    if not req.player_tag.startswith("#"):
+        raise HTTPException(status_code=400, detail="Invalid player tag")
+
+    conn = get_connection()
+    try:
+        register_player(
+            conn,
+            player_tag=req.player_tag,
+            player_name=req.player_name
+        )
+    finally:
+        conn.close()
+
+    return {
+        "status": "ok",
+        "player_tag": req.player_tag
+    }
 
 
 @app.get("/analytics/decks")

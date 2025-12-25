@@ -48,11 +48,24 @@ def ingest_battle(conn, battle):
                 battle["game_mode"],
             )
         )
-        
+
         inserted = cur.rowcount == 1
 
     conn.commit()
     return inserted
+
+def register_player(conn, player_tag, player_name=None):
+    query = """
+        INSERT INTO players (player_tag, player_name, is_active)
+        VALUES (%s, %s, TRUE)
+        ON CONFLICT (player_tag)
+        DO UPDATE SET
+            is_active = TRUE,
+            player_name = COALESCE(EXCLUDED.player_name, players.player_name);
+    """
+    with conn.cursor() as cur:
+        cur.execute(query, (player_tag, player_name))
+    conn.commit()
 
 #this should just be a db read, return players with active status assigned to them
 def get_active_players(conn):
