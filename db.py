@@ -48,8 +48,11 @@ def ingest_battle(conn, battle):
                 battle["game_mode"],
             )
         )
+        
+        inserted = cur.rowcount == 1
 
     conn.commit()
+    return inserted
 
 #this should just be a db read, return players with active status assigned to them
 def get_active_players(conn):
@@ -64,6 +67,7 @@ def get_active_players(conn):
         rows = cur.fetchall()
     return [row[0] for row in rows]
 
+#db write
 def update_last_polled_at(conn,player_tag):
     query = """
         UPDATE players
@@ -74,6 +78,15 @@ def update_last_polled_at(conn,player_tag):
         cur.execute(query, (player_tag,))
     conn.commit()
 
+def update_last_seen_at(conn, player_tag):
+    query = """
+    UPDATE players
+    SET last_seen_at = NOW()
+    WHERE player_tag = %s;
+    """
+    with conn.cursor() as cur:
+        cur.execute(query, (player_tag,))
+    conn.commit()
 
 def get_deck_win_rates(conn):
     """
