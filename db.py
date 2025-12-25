@@ -111,7 +111,7 @@ def get_mode_win_rates(conn):
     ]
 
 
-def get_time_based_win_rate(conn):
+def get_time_series_win_rates(conn):
     with conn.cursor() as cur:
         cur.execute(
             """
