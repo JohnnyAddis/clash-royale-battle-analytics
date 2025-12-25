@@ -1,7 +1,7 @@
 import time
 from api import fetch_battle_log
 from parser import parse_battle
-from db import get_connection, ingest_battle, get_deck_win_rates, get_mode_win_rates, get_time_series_win_rates, get_active_players
+from db import get_connection, ingest_battle, get_deck_win_rates, get_mode_win_rates, get_time_series_win_rates, get_active_players, update_last_polled_at
 from config import PLAYER_TAG
 
 POLLING_INTERVAL_SECONDS = 5 #10 minutes for now
@@ -18,7 +18,7 @@ def poll_once(conn, player_tag):
 
         ingest_battle(conn, parsed)
         inserted += 1
-
+    update_last_polled_at(conn, player_tag)
     print(f"[poll] processed {len(battles)} battles")
 
 

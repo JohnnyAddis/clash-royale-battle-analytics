@@ -64,6 +64,16 @@ def get_active_players(conn):
         rows = cur.fetchall()
     return [row[0] for row in rows]
 
+def update_last_polled_at(conn,player_tag):
+    query = """
+        UPDATE players
+        SET last_polled_at = NOW()
+        WHERE player_tag = %s;
+    """
+    with conn.cursor() as cur:
+        cur.execute(query, (player_tag,))
+    conn.commit()
+
 
 def get_deck_win_rates(conn):
     """
