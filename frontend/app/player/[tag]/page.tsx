@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getPlayer, registerPlayer } from "@/lib/api";
+import AnalyticsTabs from "@/components/AnalyticsTabs";
 
 export default function PlayerPage() {
   const params = useParams();
@@ -55,6 +56,11 @@ export default function PlayerPage() {
       {player.last_seen_at && (
         <p>Active — last played {player.last_seen_at}</p>
       )}
+      
+      {player.last_polled_at && (
+      <AnalyticsTabs />
+      )}
+
     </div>
   );
 }

@@ -18,5 +18,19 @@ export async function registerPlayer(tag: string) {
 }
 
 export async function getDeckAnalytics() {
-  return fetch(`${API_BASE}/analytics/decks`).then(r => r.json());
+  const res = await fetch(`${API_BASE}/analytics/decks`);
+  if (!res.ok) throw new Error("Failed to fetch deck analytics");
+  return res.json();
+}
+
+export async function getModeAnalytics() {
+  const res = await fetch(`${API_BASE}/analytics/modes`);
+  if (!res.ok) throw new Error("Failed to fetch mode analytics");
+  return res.json();
+}
+
+export async function getTimeSeriesAnalytics() {
+  const res = await fetch(`${API_BASE}/analytics/timeseries`);
+  if (!res.ok) throw new Error("Failed to fetch time series analytics");
+  return res.json();
 }
