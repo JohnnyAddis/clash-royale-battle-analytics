@@ -19,3 +19,5 @@ if API_TOKEN is None:
 
 if DB_CONFIG["password"] is None:
     raise RuntimeError("POSTGRES_PASSWORD not set")
+
+
