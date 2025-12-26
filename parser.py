@@ -71,11 +71,11 @@ def parse_battle(battle):
         return None  # skip this battle safely
 
     return {
-        "game_mode": mode,
-        "player_tag": PLAYER_TAG,
-        "player_name": battle["team"][0]["name"],
-        "opponent_tag": battle["opponent"][0]["tag"],
-        "deck_signature": sign_deck(battle["team"][0]["cards"]),
-        "battle_time": get_battle_time(battle),
-        "win": win,
-    }
+    "game_mode": mode,
+    "player_tag": battle["team"][0]["tag"],
+    "player_name": battle["team"][0]["name"],
+    "opponent_tag": battle["opponent"][0]["tag"],
+    "deck_signature": sign_deck(battle["team"][0]["cards"]),
+    "battle_time": get_battle_time(battle),
+    "win": win,
+}

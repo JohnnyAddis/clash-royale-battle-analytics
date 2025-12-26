@@ -36,9 +36,15 @@ export async function registerPlayer(tag: string) {
 }
 
 
-export async function getDeckAnalytics() {
-  const res = await fetch(`${API_BASE}/analytics/decks`);
-  if (!res.ok) throw new Error("Failed to fetch deck analytics");
+export async function getDeckAnalytics(playerTag: string) {
+  const res = await fetch(
+    `${API_BASE}/analytics/decks/${encodeURIComponent(playerTag)}`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch deck analytics");
+  }
+
   return res.json();
 }
 

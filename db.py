@@ -176,9 +176,9 @@ def mark_player_inactive(conn, player_tag: str):
         )
     conn.commit()
 
-def get_deck_win_rates(conn):
+def get_deck_win_rates(conn, player_tag):
     """
-    Returns win rate statistics per deck (RANKED/TROPHY MODE ONLY).
+    Returns win rate statistics per deck for a single player.
     """
     with conn.cursor() as cur:
         cur.execute(
@@ -189,12 +189,17 @@ def get_deck_win_rates(conn):
                 SUM(win::int) AS wins,
                 ROUND(AVG(win::int) * 100, 2) AS win_rate
             FROM battles
+            WHERE player_tag = %s
             GROUP BY deck_signature
             ORDER BY win_rate DESC;
-            """
+            """,
+            (player_tag,)
         )
 
         rows = cur.fetchall()
+
+    return rows
+
 
     results = []
     for deck_signature, games, wins, win_rate in rows:

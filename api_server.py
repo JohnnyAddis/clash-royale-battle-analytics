@@ -10,6 +10,7 @@ from db import (
     get_player_by_tag
 )
 from fastapi.middleware.cors import CORSMiddleware
+from parser import normalize_player_tag
 
 
 app = FastAPI(
@@ -99,13 +100,18 @@ def list_players():
     finally:
         conn.close()
 
-@app.get("/analytics/decks")
-def deck_win_rates():
+
+
+@app.get("/analytics/decks/{player_tag}")
+def deck_win_rates(player_tag: str):
+    player_tag = normalize_player_tag(player_tag)
+
     conn = get_connection()
     try:
-        return get_deck_win_rates(conn)
+        return get_deck_win_rates(conn, player_tag)
     finally:
         conn.close()
+
 
 
 @app.get("/analytics/modes")
