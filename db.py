@@ -160,6 +160,18 @@ def update_last_seen_at(conn, player_tag):
         cur.execute(query, (player_tag,))
     conn.commit()
 
+def mark_player_inactive(conn, player_tag: str):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE players
+            SET is_active = FALSE
+            WHERE player_tag = %s;
+            """,
+            (player_tag,)
+        )
+    conn.commit()
+
 def get_deck_win_rates(conn):
     """
     Returns win rate statistics per deck (RANKED/TROPHY MODE ONLY).

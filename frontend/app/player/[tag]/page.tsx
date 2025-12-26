@@ -36,6 +36,14 @@ export default function PlayerPage() {
     load();
   }, [tag]);
 
+  useEffect(() => {
+  const id = setInterval(() => {
+    load();
+  }, 15000); // 15 seconds
+
+  return () => clearInterval(id);
+}, [tag]);
+
   /* ---------------- ERROR STATE ---------------- */
 
   if (loading) {
@@ -114,10 +122,33 @@ export default function PlayerPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Player Dashboard</h1>
-          <p className="text-gray-500">{player.player_tag}</p>
-        </div>
+        <div className="flex items-center justify-between">
+  <div>
+    <h1 className="text-2xl font-semibold">Player Dashboard</h1>
+    <p className="text-gray-500">{player.player_tag}</p>
+  </div>
+
+  <div>
+    {player.last_polled_at === null && (
+      <span className="text-sm px-3 py-1 rounded-full bg-gray-100 text-gray-600">
+        Waiting for poll
+      </span>
+    )}
+
+    {player.last_polled_at && !player.last_seen_at && (
+      <span className="text-sm px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
+        Polling
+      </span>
+    )}
+
+    {player.last_seen_at && (
+      <span className="text-sm px-3 py-1 rounded-full bg-green-100 text-green-700">
+        Active
+      </span>
+    )}
+  </div>
+</div>
+
 
         <div className="bg-white rounded-xl shadow-sm p-6">
           {player.last_polled_at === null && (
@@ -132,7 +163,7 @@ export default function PlayerPage() {
                 Tracking — no recent battles
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Last checked: {formatTime(player.last_polled_at)}
+                Last updated: {formatTime(player.last_polled_at)}
               </p>
             </>
           )}
