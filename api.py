@@ -1,8 +1,11 @@
 import requests
 from config import API_TOKEN
+from urllib.parse import quote
 
 def fetch_battle_log(player_tag):
-    url = f"https://api.clashroyale.com/v1/players/%23{player_tag}/battlelog"
+    encoded_tag = quote(player_tag, safe="")
+    url = f"https://api.clashroyale.com/v1/players/{encoded_tag}/battlelog"
+    
 
     headers = {
         "Accept": "application/json",

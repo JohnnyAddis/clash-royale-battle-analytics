@@ -1,12 +1,16 @@
 # db.py
 import psycopg2
 from config import DB_CONFIG
+from parser import normalize_player_tag
 
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 
 def ingest_battle(conn, battle):
+    player_tag = normalize_player_tag(battle["player_tag"])
+    opponent_tag = normalize_player_tag(battle["opponent_tag"])
+
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -14,7 +18,7 @@ def ingest_battle(conn, battle):
             VALUES (%s, %s)
             ON CONFLICT (player_tag) DO NOTHING;
             """,
-            (battle["player_tag"], battle["player_name"])
+            (player_tag, battle["player_name"])
         )
 
         cur.execute(
@@ -40,9 +44,9 @@ def ingest_battle(conn, battle):
             ON CONFLICT DO NOTHING;
             """,
             (
-                battle["player_tag"],
+                player_tag,
                 battle["battle_time"],
-                battle["opponent_tag"],
+                opponent_tag,
                 battle["deck_signature"],
                 battle["win"],
                 battle["game_mode"],

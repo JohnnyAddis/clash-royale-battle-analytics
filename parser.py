@@ -2,6 +2,12 @@
 from datetime import datetime, timezone
 from config import RANKED_MODE_ID, TROPHY_MODE_ID, PLAYER_TAG
 
+def normalize_player_tag(tag: str) -> str:
+    if not tag.startswith("#"):
+        return f"#{tag}"
+    return tag
+
+
 def sign_deck(deck):
     deck_tokens = []
 
@@ -39,17 +45,30 @@ def get_battle_time(battle):
 
 
 def get_result(game_mode, battle):
-    if game_mode == "TROPHY":
-        return battle["team"][0]["trophyChange"] > 0
+    team = battle["team"][0]
+    opponent = battle["opponent"][0]
 
-    if game_mode == "RANKED":
-        return battle["team"][0]["crowns"] > battle["opponent"][0]["crowns"]
+    # Primary, always-safe signal
+    if "crowns" in team and "crowns" in opponent:
+        return team["crowns"] > opponent["crowns"]
+
+    # Fallback: use trophyChange if present
+    if "trophyChange" in team:
+        return team["trophyChange"] > 0
+
+    # If we cannot determine result safely, skip this battle
+    raise ValueError("Cannot determine battle result")
 
 
 def parse_battle(battle):
     mode = get_mode(battle["gameMode"]["id"])
     if mode is None:
         return None
+
+    try:
+        win = get_result(mode, battle)
+    except ValueError:
+        return None  # skip this battle safely
 
     return {
         "game_mode": mode,
@@ -58,5 +77,5 @@ def parse_battle(battle):
         "opponent_tag": battle["opponent"][0]["tag"],
         "deck_signature": sign_deck(battle["team"][0]["cards"]),
         "battle_time": get_battle_time(battle),
-        "win": get_result(mode, battle),
+        "win": win,
     }
