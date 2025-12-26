@@ -32,22 +32,30 @@ class PlayerRegisterRequest(BaseModel):
 @app.post("/players/register")
 def register_player_endpoint(req: PlayerRegisterRequest):
     if not req.player_tag.startswith("#"):
-        raise HTTPException(status_code=400, detail="Invalid player tag")
+        raise HTTPException(status_code=400, detail="Invalid player tag format")
+
+    try:
+        profile = fetch_player_profile(req.player_tag)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Player tag does not exist")
 
     conn = get_connection()
     try:
         register_player(
             conn,
             player_tag=req.player_tag,
-            player_name=req.player_name
+            player_name=profile["name"]  # authoritative name
         )
     finally:
         conn.close()
 
+    # good
     return {
         "status": "ok",
-        "player_tag": req.player_tag
+        "player_tag": req.player_tag,
+        "player_name": profile["name"],
     }
+
 
 @app.get("/players/{player_tag}")
 def get_player(player_tag: str):

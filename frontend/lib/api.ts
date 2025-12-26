@@ -2,10 +2,19 @@ const API_BASE = "http://localhost:8000";
 
 export async function getPlayer(tag: string) {
   const res = await fetch(`${API_BASE}/players/${encodeURIComponent(tag)}`);
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to fetch player");
+
+  if (res.status === 404) {
+    return null; // player not tracked
+  }
+
+  if (!res.ok) {
+    const body = await res.json();
+    throw new Error(body.detail || "Invalid player tag");
+  }
+
   return res.json();
 }
+
 
 export async function registerPlayer(tag: string) {
   const res = await fetch(`${API_BASE}/players/register`, {

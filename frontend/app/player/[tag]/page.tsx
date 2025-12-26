@@ -15,17 +15,28 @@ export default function PlayerPage() {
 
   const [player, setPlayer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const p = await getPlayer(tag);
-    setPlayer(p);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const p = await getPlayer(tag);
+      setPlayer(p);
+    } catch (e: any) {
+      setPlayer(null);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     load();
   }, [tag]);
+
+  /* ---------------- ERROR STATE ---------------- */
 
   if (loading) {
     return (
@@ -35,19 +46,46 @@ export default function PlayerPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
+          <h1 className="text-xl font-semibold mb-2">
+            Invalid Player Tag
+          </h1>
+          <p className="text-sm text-red-600 mb-6">
+            {error}
+          </p>
+          <p className="text-sm text-gray-500">
+            Please check the tag and try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------------- NOT TRACKED STATE ---------------- */
+
   if (!player) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
-          <h1 className="text-xl font-semibold mb-2">Track Player</h1>
+          <h1 className="text-xl font-semibold mb-2">
+            Track Player
+          </h1>
           <p className="text-gray-500 mb-6">
-            This player is not being tracked yet.
+            This player exists but is not being tracked yet.
           </p>
 
           <button
             onClick={async () => {
-              await registerPlayer(tag);
-              await load();
+              try {
+                setError(null);
+                await registerPlayer(tag);
+                await load();
+              } catch (e: any) {
+                setError(e.message);
+              }
             }}
             className="
               w-full
@@ -71,16 +109,16 @@ export default function PlayerPage() {
     );
   }
 
+  /* ---------------- DASHBOARD ---------------- */
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-        {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold">Player Dashboard</h1>
           <p className="text-gray-500">{player.player_tag}</p>
         </div>
 
-        {/* Status Card */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           {player.last_polled_at === null && (
             <p className="text-gray-500">
@@ -114,7 +152,6 @@ export default function PlayerPage() {
           )}
         </div>
 
-        {/* Analytics */}
         {player.last_polled_at && (
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h3 className="text-sm font-medium text-gray-500 mb-4">
