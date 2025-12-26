@@ -115,18 +115,18 @@ def deck_win_rates(player_tag: str):
 
 
 @app.get("/analytics/modes")
-def mode_win_rates():
+def mode_win_rates(player_tag: str):
     conn = get_connection()
     try:
-        return get_mode_win_rates(conn)
+        return get_mode_win_rates(conn, player_tag)
     finally:
         conn.close()
 
 
 @app.get("/analytics/timeseries")
-def time_series():
+def time_series(player_tag: str):
     conn = get_connection()
     try:
-        return get_time_series_win_rates(conn)
+        return get_time_series_win_rates(conn, player_tag)
     finally:
         conn.close()

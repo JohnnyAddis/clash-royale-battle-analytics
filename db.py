@@ -213,7 +213,7 @@ def get_deck_win_rates(conn, player_tag):
     return results
 
 
-def get_mode_win_rates(conn):
+def get_mode_win_rates(conn, player_tag):
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -223,8 +223,11 @@ def get_mode_win_rates(conn):
                 SUM(win::int) AS wins,
                 ROUND(AVG(win::int) * 100, 2) AS win_rate
             FROM battles
-            GROUP BY game_mode;
-            """
+            WHERE player_tag = %s
+            GROUP BY game_mode
+            ORDER BY games DESC;
+            """,
+            (player_tag,)
         )
 
         rows = cur.fetchall()
@@ -240,7 +243,8 @@ def get_mode_win_rates(conn):
     ]
 
 
-def get_time_series_win_rates(conn):
+
+def get_time_series_win_rates(conn, player_tag):
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -249,12 +253,16 @@ def get_time_series_win_rates(conn):
                 COUNT(*) AS games,
                 ROUND(AVG(win::int) * 100, 2) AS win_rate
             FROM battles
+            WHERE player_tag = %s
             GROUP BY day
             ORDER BY day;
-            """
+            """,
+            (player_tag,)
         )
+
         rows = cur.fetchall()
-        return [
+
+    return [
         {
             "date": day,
             "games": games,

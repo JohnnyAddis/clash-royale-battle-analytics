@@ -1,5 +1,10 @@
 const API_BASE = "http://localhost:8000";
 
+function normalizeTag(tag: string) {
+  const clean = tag.trim().replace(/^#/, "");
+  return `#${clean}`;
+}
+
 export async function getPlayer(tag: string) {
   const clean = tag.trim().replace(/^#/, "");
   const normalized = `#${clean}`;
@@ -48,14 +53,32 @@ export async function getDeckAnalytics(playerTag: string) {
   return res.json();
 }
 
-export async function getModeAnalytics() {
-  const res = await fetch(`${API_BASE}/analytics/modes`);
-  if (!res.ok) throw new Error("Failed to fetch mode analytics");
+export async function getModeAnalytics(playerTag: string) {
+  const normalized = normalizeTag(playerTag);
+
+  const res = await fetch(
+    `${API_BASE}/analytics/modes?player_tag=${encodeURIComponent(normalized)}`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch mode analytics");
+  }
+
   return res.json();
 }
 
-export async function getTimeSeriesAnalytics() {
-  const res = await fetch(`${API_BASE}/analytics/timeseries`);
-  if (!res.ok) throw new Error("Failed to fetch time series analytics");
+
+export async function getTimeSeriesAnalytics(playerTag: string) {
+  const normalized = normalizeTag(playerTag);
+
+  const res = await fetch(
+    `${API_BASE}/analytics/timeseries?player_tag=${encodeURIComponent(normalized)}`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch time series analytics");
+  }
+
   return res.json();
 }
+

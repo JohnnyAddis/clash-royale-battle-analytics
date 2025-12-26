@@ -1,31 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { getTimeSeriesAnalytics } from "@/lib/api";
 
-export default function AnalyticsTimeseries() {
+export default function AnalyticsTimeSeries() {
+  const params = useParams();
+  const playerTag = decodeURIComponent(params.tag as string);
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTimeSeriesAnalytics().then(d => {
-      setData(d);
+    async function load() {
+      setLoading(true);
+      const res = await getTimeSeriesAnalytics(playerTag);
+      setData(res);
       setLoading(false);
-    });
-  }, []);
+    }
 
-  if (loading) return <p>Loading trends…</p>;
+    load();
+  }, [playerTag]);
+
+  if (loading) {
+    return <p className="text-gray-500">Loading time series…</p>;
+  }
+
+  if (data.length === 0) {
+    return <p className="text-gray-500">No time series data yet.</p>;
+  }
 
   return (
-    <div>
-      <h3>Win Rate Over Time</h3>
-      <ul>
-        {data.map((d, i) => (
-          <li key={i}>
-            {d.date}: {d.win_rate}% ({d.games} games)
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-2">
+      {data.map((row) => (
+        <div
+          key={row.date}
+          className="flex justify-between text-sm border rounded px-3 py-2"
+        >
+          <span>{row.date}</span>
+          <span>
+            {row.games} games · {row.win_rate}%
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
